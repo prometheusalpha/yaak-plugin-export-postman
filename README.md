@@ -29,6 +29,16 @@ npm install
 npx ts-node src/cli.ts path/to/yaak-export.json out.postman.json
 ```
 
+`bun src/cli.ts …` runs it with no install step.
+
+Input is either a raw Yaak export file (`resources.*` — workspaces, folders, httpRequests,
+environments) or the normalized collection shape (`{ name, items[] }`) the plugin builds
+inside Yaak. `out.postman.json` is optional and defaults to `./postman-export.json`.
+
+A raw export also writes one Postman environment file per Yaak environment, next to the
+collection: `<environment name>.postman_environment.json`. Workspace-level (base) environment
+variables are additionally copied into the collection's `variable` array.
+
 ## Tests
 
 ```bash
@@ -50,4 +60,6 @@ The plugin uses the Yaak plugin context APIs to:
 - Auth is automatically detected: if username+password present → basic auth, if token present → bearer auth, if key+value → API key auth
 - Variables in all contexts (URLs, bodies, headers, auth) are converted from `${[name]}` to `{{name}}`
 - Folder hierarchy is preserved using nested `item` arrays in the Postman format
+- Yaak `urlParameters` become Postman `url.query` entries and are appended to `url.raw` (disabled entries stay in `query` but not in `raw`); `:name` placeholders become `url.variable` entries
+- An empty body (empty text, or a form without named fields) is omitted rather than exported as an empty raw body
 - Request/folder-level auth overrides collection-level auth (standard Postman behavior)
